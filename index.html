@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Chat Interface</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #33333E; border-radius: 10px; }
+
+    .mic-glow { box-shadow: 0 0 25px 5px rgba(96, 197, 134, 0.3); }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg-animate { animation: slideUp 0.3s ease-out forwards; }
+    
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Container -->
+  <div class="w-full max-w-[400px] h-[850px] bg-[#0F0F13] relative overflow-hidden flex flex-col text-white sm:rounded-[40px] sm:border-[8px] sm:border-black shadow-2xl">
+    
+    <!-- iOS Status Bar -->
+    <div class="flex justify-between items-center px-6 pt-4 pb-1 text-[15px] font-semibold tracking-wide z-20 bg-[#0F0F13]">
+      <div>2:51</div>
+      <div class="flex items-center gap-1.5">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect y="8" width="3" height="4" rx="1" fill="white"/>
+          <rect x="5" y="6" width="3" height="6" rx="1" fill="white"/>
+          <rect x="10" y="3" width="3" height="9" rx="1" fill="white"/>
+          <rect x="15" width="3" height="12" rx="1" fill="white"/>
+        </svg>
+        <i class="ph-fill ph-wifi-high text-[17px]"></i>
+        <div class="flex items-center relative ml-1">
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" opacity="0.4"/>
+            <rect x="2" y="2" width="13" height="8" rx="2" fill="white"/>
+            <path d="M23 4V8C23.5523 8 24 7.5523 24 7V5C24 4.4477 23.5523 4 23 4Z" fill="white" opacity="0.4"/>
+          </svg>
+          <span class="absolute text-[10px] font-bold text-black left-1.5">52</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Tools Bar -->
+    <div class="flex justify-between items-center px-5 py-3 z-30 bg-[#0F0F13]">
+      <i class="ph-fill ph-image text-[#6F6F7B] text-2xl cursor-pointer"></i>
+      <div class="bg-[#212131] p-2.5 rounded-[14px] text-[#7C84EB] cursor-pointer">
+        <i class="ph-fill ph-chat-centered-text text-xl"></i>
+      </div>
+      <i class="ph-fill ph-phone text-[#6F6F7B] text-2xl cursor-pointer"></i>
+      <i class="ph ph-binoculars text-[#6F6F7B] text-2xl cursor-pointer"></i>
+      <i class="ph ph-sun text-[#6F6F7B] text-2xl cursor-pointer"></i>
+      
+      <!-- SECRET TOGGLE ICON (Starts as Orange "I") -->
+      <div id="secret-sender-btn" class="w-8 h-8 bg-[#DF8B3D] rounded-full flex items-center justify-center text-black font-semibold text-[15px] cursor-pointer relative select-none shadow-lg transition-colors">
+        <span id="secret-sender-text">I</span>
+        
+        <!-- Hidden Dropdown Menu -->
+        <div id="secret-dropdown" class="absolute top-10 right-0 bg-[#191921] border border-[#282834] rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.8)] w-48 overflow-hidden hidden flex-col z-50">
+           <div class="px-4 py-3 text-[13px] text-white hover:bg-[#252532] cursor-pointer border-b border-[#282834] flex items-center gap-3" onclick="setSender('ME', event)">
+              <div class="w-6 h-6 rounded-full bg-[#695CED] flex items-center justify-center text-[9px] font-bold text-white">ME</div>
+              Me (Right Side)
+           </div>
+           <div class="px-4 py-3 text-[13px] text-white hover:bg-[#252532] cursor-pointer border-b border-[#282834] flex items-center gap-3" onclick="setSender('ST', event)">
+              <div class="w-6 h-6 rounded-full bg-[#695CED] flex items-center justify-center text-[10px] font-bold text-white">ST</div>
+              Steven
+           </div>
+           <div class="px-4 py-3 text-[13px] text-white hover:bg-[#252532] cursor-pointer border-b border-[#282834] flex items-center gap-3" onclick="setSender('JT', event)">
+              <div class="w-6 h-6 rounded-full bg-[#A477C7] flex items-center justify-center text-white text-[10px] font-bold">JT</div>
+              Jonathan
+           </div>
+           <div class="px-4 py-3 text-[13px] text-white hover:bg-[#252532] cursor-pointer flex items-center gap-3" onclick="setSender('IN', event)">
+              <div class="w-6 h-6 rounded-full bg-[#DF8B3D] flex items-center justify-center text-black text-[10px] font-bold">IN</div>
+              India k
+           </div>
+        </div>
+      </div>
+
+      <i class="ph ph-sign-out text-[#6F6F7B] text-2xl cursor-pointer"></i>
+    </div>
+
+    <!-- Header Section -->
+    <div class="flex items-center justify-between px-4 py-2 z-20 bg-[#0F0F13] border-b border-[#1C1C23]">
+      <div class="flex items-center gap-3">
+        <i class="ph ph-arrow-left text-[#9A9A9A] text-xl font-bold cursor-pointer"></i>
+        <div class="w-12 h-12 bg-[#695CED] rounded-2xl flex items-center justify-center shadow-md">
+           <i class="ph-fill ph-users text-white text-2xl"></i>
+        </div>
+        <div class="flex flex-col">
+          <h1 class="font-bold text-[17px] leading-[1.2]">India<br>Marketing</h1>
+          <p class="text-[#7E7E8A] text-[13px] mt-0.5">6 members</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 text-[#7A7A8A]">
+        <i class="ph-fill ph-phone text-2xl cursor-pointer hover:text-white transition-colors"></i>
+        <i class="ph-fill ph-video-camera text-2xl cursor-pointer hover:text-white transition-colors"></i>
+        <i class="ph-bold ph-dots-three-vertical text-xl cursor-pointer hover:text-white transition-colors"></i>
+      </div>
+    </div>
+
+    <!-- Scrollable Chat Area -->
+    <div id="chat-container" class="flex-1 overflow-y-auto no-scrollbar px-4 pt-4 pb-[130px] z-0 relative scroll-smooth" onclick="closeDropdown()">
+      
+      <!-- Date Pill -->
+      <div class="flex justify-center mb-6">
+         <span class="bg-[#1C1C23] text-[#7A7A8A] text-[12px] font-medium px-4 py-1.5 rounded-full border border-[#252530]">Yesterday</span>
+      </div>
+
+      <!-- Messages injected here via JS -->
+      
+      <!-- Auto-scroll target anchor -->
+      <div id="chat-anchor" class="h-4"></div>
+    </div>
+
+    <!-- Floating Action Buttons -->
+    <div class="absolute bottom-[90px] right-4 flex flex-col items-center gap-3 z-20">
+       <!-- Scroll Down Button - Hidden by default using opacity-0 and pointer-events-none -->
+       <button id="scroll-down-btn" class="w-[42px] h-[42px] bg-[#1D1D27] rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(0,0,0,0.5)] border border-[#2C2C3A] hover:bg-[#252532] transition-all duration-300 opacity-0 pointer-events-none translate-y-2" onclick="scrollToBottom()">
+         <i class="ph ph-arrow-down text-[#9A9A9A] text-[18px]"></i>
+       </button>
+       
+       <button class="w-[56px] h-[56px] bg-[#60C586] mic-glow rounded-full flex items-center justify-center relative hover:bg-[#53B579] transition-colors">
+          <i class="ph-fill ph-microphone text-white text-[24px]"></i>
+       </button>
+    </div>
+
+    <!-- Bottom Input Area -->
+    <div class="absolute bottom-0 w-full px-4 pb-6 pt-6 bg-gradient-to-t from-[#0F0F13] via-[#0F0F13] to-transparent z-30">
+       <div class="bg-[#191921] rounded-full flex items-center px-4 py-[12px] gap-3 border border-[#282834] shadow-lg relative focus-within:border-[#695CED] transition-colors">
+          <i class="ph ph-smiley text-[#6F6F7B] text-[22px] cursor-pointer hover:text-white transition-colors"></i>
+          
+          <input type="text" id="chat-input" placeholder="Message" class="bg-transparent flex-1 outline-none text-[#EBEBEF] text-[15px] placeholder-[#6F6F7B]" onclick="closeDropdown()">
+          
+          <i class="ph ph-paperclip text-[#6F6F7B] text-[22px] cursor-pointer hover:text-white transition-colors"></i>
+          <i class="ph ph-camera text-[#6F6F7B] text-[22px] cursor-pointer hover:text-white transition-colors"></i>
+          
+          <!-- Dynamic Action Icon -->
+          <div id="action-btn" class="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all">
+            <i id="action-icon" class="ph ph-microphone text-[#6F6F7B] text-[22px] transition-colors"></i>
+          </div>
+       </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- CHAT HISTORY DATA ---
+    const chatHistory = [
+      { sender: "JT", name: "Jonathan T", color: "bg-[#A477C7]", text: "Hi good morning, how can we help today?", time: "", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "Hi. Gm. First of all very big congratulations and Thanks to you.", time: "05:40", reaction: { emoji: "❤️", count: 1 } },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "Any growth in India side business?", time: "05:50", reaction: null },
+      { sender: "JT", name: "Jonathan T", color: "bg-[#A477C7]", text: "Performing teams will be given better support to be practical.", time: "06:37", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "Some people are asking: Why is there a need for a kyc in coingatevayl and is there any problem?", time: "06:38", reaction: null },
+      { sender: "JT", name: "Jonathan T", color: "bg-[#A477C7]", text: "This is the gateway we were recommended by our liquidity provider. There will be no problems.", time: "06:39", reaction: null },
+      { sender: "JT", name: "Jonathan T", color: "bg-[#A477C7]", text: "Kyc is common for all legitimate organisations due to anti money laundering etc. Long Asia has our own kyc requirements too. Is there a problem with that?", time: "06:40", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "No", time: "06:40", reaction: null },
+      { sender: "JT", name: "Jonathan T", color: "bg-[#A477C7]", text: "Our P2P has no kyc because every account is already kyced on our crm. Every fund handling organization needs a kyc in place. Hope this will help in explanation to these people who asked.", time: "06:40", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "Today very excited all leader's", time: "06:43", reaction: null },
+      { sender: "JT", name: "Jonathan T", color: "bg-[#A477C7]", text: "Yes sir. It marks a new milestone.", time: "06:43", reaction: null },
+      { sender: "JT", name: "Jonathan T", color: "bg-[#A477C7]", text: "Our company always delivers what it plans and promises. Sometimes it gets abit late due to testing etc. But give a little patience and it will come. 🙏🙏", time: "06:45", reaction: null },
+      { sender: "JT", name: "Jonathan T", color: "bg-[#A477C7]", text: "What ever bugs or issues that happens will be resolved and backpayment will be made if due to technical glitch. Few times commission failed to be calculated automatically by system, this gets resolved too. We are not perfect. So we need your feedback when issues arises so we can work on it to resolve. Thank you for the continuous support sirs.", time: "06:47", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "👍", time: "06:47", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "The otp is starting in Lasia today?", time: "06:50", reaction: null },
+      { sender: "JT", name: "Jonathan T", color: "bg-[#A477C7]", text: "Yes fixing that still. Lasia mail is having much issues. That is why we need to stop it and get everyone to move to third party like gmail", time: "06:52", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "Once you start the otp, our community will shift to Gamil", time: "06:56", reaction: null },
+      { sender: "JT", name: "Jonathan T", color: "bg-[#A477C7]", text: "Ok", time: "06:59", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "Thank you", time: "07:02", reaction: { emoji: "👍", count: 1 } },
+      { sender: "ST", name: "Steven", color: "bg-[#695CED]", text: "Can you check again the LasiaMail", time: "09:10", reaction: null },
+      { sender: "ST", name: "Steven", color: "bg-[#695CED]", text: "IT team said its fixed", time: "09:10", reaction: null },
+      { sender: "ST", name: "Steven", color: "bg-[#695CED]", text: "Also ask users to move out from lasia mail ; they can use their personal mail", time: "09:10", reaction: null },
+      { sender: "ST", name: "Steven", color: "bg-[#695CED]", text: "Dear User,<br><br>We are pleased to inform you that the OTP (One-Time Password) issues with Lasia Mail have been resolved. You should now be able to receive emails on your Lasia Mail account.<br><br>However, please note that the Lasia Mail service will be discontinued on 10th May. We kindly request you to update your email address to another provider (such as Gmail, Yahoo, or any other service) at your earliest convenience to avoid any disruption.<br><br>Thank you for your cooperation.", time: "09:27", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "yes", time: "11:41", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "In coingate way, in one account only one USDT pro address acceptable or one adress use in multiple accounts?", time: "12:00", reaction: null },
+      { sender: "ST", name: "Steven", color: "bg-[#695CED]", text: "yes I used this and see same thing", time: "12:01", reaction: null },
+      { sender: "ST", name: "Steven", color: "bg-[#695CED]", text: "Its a big company do proper KYC; also the address can be change once in 90 days", time: "12:02", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "Means, one USDT pro adress use in multiple accounts", time: "12:03", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "Right", time: "12:03", reaction: null },
+      { sender: "ST", name: "Steven", color: "bg-[#695CED]", text: "nope", time: "12:03", reaction: null },
+      { sender: "ST", name: "Steven", color: "bg-[#695CED]", text: "One address one account", time: "12:04", reaction: null },
+      { sender: "ST", name: "Steven", color: "bg-[#695CED]", text: "this add can be updated once in 90 days", time: "12:04", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "Same in long Asia, one USDT pro adress can use in multiple accounts?", time: "12:04", reaction: null },
+      { sender: "ST", name: "Steven", color: "bg-[#695CED]", text: "in LA user can update pro add; we dont put limit", time: "12:04", reaction: null },
+      { sender: "IN", name: "India.K", color: "bg-[#DF8B3D]", text: "K", time: "12:05", reaction: null }
+    ];
+
+    const chatContainer = document.getElementById('chat-container');
+    const chatInput = document.getElementById('chat-input');
+    const actionBtn = document.getElementById('action-btn');
+    const actionIcon = document.getElementById('action-icon');
+    const anchor = document.getElementById('chat-anchor');
+    const scrollDownBtn = document.getElementById('scroll-down-btn');
+    
+    // UI Setup Logic
+    const secretBtn = document.getElementById('secret-sender-btn');
+    const secretText = document.getElementById('secret-sender-text');
+    const secretDropdown = document.getElementById('secret-dropdown');
+    
+    // Sender configuration mapping with text overrides for the top button
+    const senders = {
+      'ME': { isRight: true, color: 'bg-[#695CED]', textColor: 'text-white', topText: 'ME', senderCode: 'ME' },
+      'ST': { isRight: false, name: 'Steven', color: 'bg-[#695CED]', textColor: 'text-white', topText: 'ST', senderCode: 'ST' },
+      'JT': { isRight: false, name: 'Jonathan T', color: 'bg-[#A477C7]', textColor: 'text-white', topText: 'JT', senderCode: 'JT' },
+      'IN': { isRight: false, name: 'India.K', color: 'bg-[#DF8B3D]', textColor: 'text-black', topText: 'I', senderCode: 'IN' }
+    };
+    
+    // Default to India.K
+    let activeSender = 'IN'; 
+
+    // Render Historical Messages
+    function renderHistory() {
+       chatHistory.forEach(msg => {
+          const msgDiv = document.createElement('div');
+          msgDiv.className = 'flex gap-3 mb-5';
+          
+          let reactionHtml = '';
+          if (msg.reaction) {
+             reactionHtml = `
+             <div class="absolute -bottom-3.5 left-3.5 bg-[#191921] border border-[#2D2D3D] rounded-full px-2 py-0.5 flex items-center gap-1.5 shadow-sm">
+                 <span class="text-[13px]">${msg.reaction.emoji}</span>
+                 <span class="text-[#EBEBEF] text-[12px] font-medium pr-0.5">${msg.reaction.count}</span>
+             </div>`;
+          }
+
+          let timeHtml = msg.time ? `<span class="text-[11px] text-[#636372] absolute bottom-2 left-3.5">${msg.time}</span>` : '';
+          let pbClass = msg.time ? 'pb-7' : 'pb-3.5';
+
+          msgDiv.innerHTML = `
+             <div class="w-[38px] h-[38px] rounded-full ${msg.color} flex items-center justify-center text-white font-medium text-[15px] flex-shrink-0 mt-5">${msg.sender}</div>
+             <div class="flex flex-col relative max-w-[85%] w-full">
+                <span class="text-[#7A7A8A] text-[12px] mb-1.5 ml-1">${msg.name}</span>
+                <div class="bg-[#191921] rounded-2xl rounded-tl-md px-3.5 pt-3.5 ${pbClass} shadow-sm border border-[#22222C] relative">
+                   <p class="text-[15px] leading-[1.4] text-[#EBEBEF] break-words">${msg.text}</p>
+                   ${timeHtml}
+                </div>
+                ${reactionHtml}
+             </div>
+          `;
+          chatContainer.insertBefore(msgDiv, anchor);
+       });
+    }
+
+    // Scroll Logic for the floating arrow button
+    function checkScroll() {
+       // If scroll position is near bottom (within 40px margin) hide the button, else show it
+       const isNearBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < 40;
+       
+       if (isNearBottom) {
+           scrollDownBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+           scrollDownBtn.classList.remove('opacity-100', 'translate-y-0');
+       } else {
+           scrollDownBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+           scrollDownBtn.classList.add('opacity-100', 'translate-y-0');
+       }
+    }
+
+    // Attach scroll listener to container
+    chatContainer.addEventListener('scroll', checkScroll);
+
+    function scrollToBottom() {
+      anchor.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Dropdown Toggles
+    secretBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        secretDropdown.classList.toggle('hidden');
+        secretDropdown.classList.toggle('flex');
+    });
+
+    function closeDropdown() {
+        secretDropdown.classList.add('hidden');
+        secretDropdown.classList.remove('flex');
+    }
+    
+    document.addEventListener('click', closeDropdown);
+
+    function setSender(type, event) {
+      if(event) event.stopPropagation();
+      activeSender = type;
+      const conf = senders[type];
+      
+      secretBtn.className = `w-8 h-8 ${conf.color} rounded-full flex items-center justify-center ${conf.textColor} font-semibold text-[13px] cursor-pointer relative select-none shadow-lg transition-colors`;
+      secretText.innerText = conf.topText;
+      
+      closeDropdown();
+      chatInput.focus();
+    }
+
+    // Input Dynamics
+    chatInput.addEventListener('input', () => {
+      if (chatInput.value.trim().length > 0) {
+        actionIcon.className = "ph-fill ph-paper-plane-right text-[#695CED] text-[22px]";
+        actionBtn.className = "w-8 h-8 bg-[#695CED]/20 rounded-full flex items-center justify-center cursor-pointer transition-all";
+      } else {
+        actionIcon.className = "ph ph-microphone text-[#6F6F7B] text-[22px]";
+        actionBtn.className = "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all";
+      }
+    });
+
+    // Send logic
+    function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      const conf = senders[activeSender];
+      const msgDiv = document.createElement('div');
+      
+      if (conf.isRight) {
+        msgDiv.className = 'flex gap-3 mb-4 flex-row-reverse msg-animate';
+        msgDiv.innerHTML = `
+           <div class="flex flex-col max-w-[85%] items-end w-full">
+              <div class="bg-[#695CED] rounded-2xl rounded-tr-md px-3.5 pt-3.5 pb-7 shadow-sm relative">
+                 <p class="text-[15px] leading-[1.4] text-white break-words">${text}</p>
+                 <span class="text-[11px] text-[#D0CCF7] absolute bottom-2 right-3.5">${timeStr}</span>
+              </div>
+           </div>
+        `;
+      } else {
+        msgDiv.className = 'flex gap-3 mb-4 msg-animate';
+        msgDiv.innerHTML = `
+           <div class="w-[38px] h-[38px] rounded-full ${conf.color} flex items-center justify-center text-white font-medium text-[15px] flex-shrink-0 mt-5">${conf.senderCode}</div>
+           <div class="flex flex-col max-w-[85%] w-full">
+              <span class="text-[#7A7A8A] text-[12px] mb-1.5 ml-1">${conf.name}</span>
+              <div class="bg-[#191921] rounded-2xl rounded-tl-md px-3.5 pt-3.5 pb-7 shadow-sm border border-[#22222C] relative">
+                 <p class="text-[15px] leading-[1.4] text-[#EBEBEF] break-words">${text}</p>
+                 <span class="text-[11px] text-[#636372] absolute bottom-2 left-3.5">${timeStr}</span>
+              </div>
+           </div>
+        `;
+      }
+
+      chatContainer.insertBefore(msgDiv, anchor);
+      chatInput.value = '';
+      chatInput.dispatchEvent(new Event('input'));
+      setTimeout(() => {
+          scrollToBottom();
+      }, 50);
+    }
+
+    actionBtn.addEventListener('click', () => {
+      if (chatInput.value.trim().length > 0) sendMessage();
+    });
+
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    // Boot Up
+    window.onload = () => {
+       renderHistory();
+       setTimeout(() => {
+           scrollToBottom();
+           checkScroll(); // Enforce state on load
+       }, 150);
+    };
+  </script>
+</body>
+</html>
