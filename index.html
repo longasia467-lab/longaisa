@@ -41,7 +41,7 @@
     
     <!-- iOS Status Bar -->
     <div class="flex justify-between items-center px-6 pt-4 pb-1 text-[15px] font-semibold tracking-wide z-20 bg-[#0F0F13]">
-      <div>2:51</div>
+      <div id="status-time">2:51</div>
       <div class="flex items-center gap-1.5">
         <svg width="18" height="12" viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect y="8" width="3" height="4" rx="1" fill="white"/>
@@ -164,6 +164,23 @@
   </div>
 
   <script>
+    // --- TIME UTILITIES ---
+    function getOffsetTime12Hour(hoursBack) {
+        const d = new Date();
+        d.setHours(d.getHours() - hoursBack);
+        let h = d.getHours() % 12 || 12;
+        let m = d.getMinutes().toString().padStart(2, '0');
+        return `${h}:${m}`;
+    }
+
+    function getOffsetTime24Hour(hoursBack) {
+        const d = new Date();
+        d.setHours(d.getHours() - hoursBack);
+        let h = d.getHours().toString().padStart(2, '0');
+        let m = d.getMinutes().toString().padStart(2, '0');
+        return `${h}:${m}`;
+    }
+
     // --- CHAT HISTORY DATA ---
     const chatHistory = [
       { sender: "JT", name: "Jonathan T", color: "bg-[#A477C7]", text: "Hi good morning, how can we help today?", time: "", reaction: null },
@@ -322,8 +339,7 @@
       const text = chatInput.value.trim();
       if (!text) return;
 
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      const timeStr = getOffsetTime24Hour(7); // Sets new messages to exactly 7 hours ago
       const conf = senders[activeSender];
       const msgDiv = document.createElement('div');
       
@@ -369,6 +385,9 @@
 
     // Boot Up
     window.onload = () => {
+       // Set the live status bar time to 7 hours back
+       document.getElementById('status-time').innerText = getOffsetTime12Hour(7);
+       
        renderHistory();
        setTimeout(() => {
            scrollToBottom();
